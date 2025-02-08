@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:product_pulse/screens/homeScreen.dart';
 import '../utils/helper.dart';
 import '../widgets/customTextInput.dart';
 import 'loginScreen.dart';
@@ -67,7 +68,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
       });
 
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Signup Successful!"),backgroundColor: Colors.green,));
-      Navigator.of(context).pushReplacementNamed(IntroScreen.routeName);
+      Navigator.of(context).pushReplacementNamed(HomeScreen.routeName);
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString())));
     } finally {

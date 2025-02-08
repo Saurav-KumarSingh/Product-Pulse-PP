@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:product_pulse/screens/homeScreen.dart';
 import '../const/colors.dart';
 import '../utils/helper.dart';
 import './signUpScreen.dart';
@@ -41,7 +42,7 @@ class _LoginScreenState extends State<LoginScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text("Login Successful!"),backgroundColor: Colors.green,),
       );
-      Navigator.of(context).pushReplacementNamed(IntroScreen.routeName);
+      Navigator.of(context).pushReplacementNamed(HomeScreen.routeName);
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text("Error: ${e.toString()}")),
