@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import './landingScreen.dart';
+import 'package:food_delivery_app/screens/introScreen.dart';
 import '../utils/helper.dart';
     
 class Splashscreen extends StatefulWidget {
@@ -16,7 +16,7 @@ class _SplashscreenState extends State<Splashscreen> {
   void initState() {
     // TODO: implement initState
     _timer = Timer(Duration(seconds: 5), () {
-      Navigator.of(context).pushReplacementNamed(LandingScreen.routeName);
+      Navigator.of(context).pushReplacementNamed(IntroScreen.routeName);
     });
     super.initState();
   }
