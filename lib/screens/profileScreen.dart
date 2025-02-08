@@ -56,7 +56,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       } catch (error) {
         setState(() {
           _isLoading = false;
-          _errorMessage = 'Error fetching data: $error';
+          _errorMessage = 'Error fetching data';
         });
       }
     } else {
