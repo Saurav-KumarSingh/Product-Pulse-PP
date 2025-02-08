@@ -97,7 +97,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                       ),
                     ),
-                    SizedBox(height: 50),
+                    SizedBox(height: 20),
                     _productsStream != null
                         ? StreamBuilder<QuerySnapshot>(
                       stream: _productsStream,
