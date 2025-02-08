@@ -21,6 +21,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
   String userName = 'Guest';
   Stream<QuerySnapshot>? _productsStream;
+  String _searchQuery = '';
+  List<Product> _allProducts = [];
+  List<Product> _filteredProducts = [];
 
   @override
   void initState() {
@@ -53,6 +56,20 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
+  void _searchProducts(String query) {
+    setState(() {
+      _searchQuery = query.toLowerCase();
+      if (_searchQuery.isEmpty) {
+        _filteredProducts = _allProducts;
+      } else {
+        _filteredProducts = _allProducts
+            .where((product) =>
+                product.productName.toLowerCase().contains(_searchQuery))
+            .toList();
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -83,11 +100,12 @@ class _HomeScreenState extends State<HomeScreen> {
                           shape: StadiumBorder(),
                         ),
                         child: TextField(
+                          onChanged: _searchProducts,
                           decoration: InputDecoration(
                             border: InputBorder.none,
                             prefixIcon: Image.asset(
                                 Helper.getAssetName("search_filled.png", "virtual")),
-                            hintText: "Search food",
+                            hintText: "Search products",
                             hintStyle: TextStyle(
                               color: AppColor.placeholder,
                               fontSize: 18,
@@ -112,7 +130,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           return Center(child: Text("No products found."));
                         }
 
-                        List<Product> products = snapshot.data!.docs.map((doc) {
+                        _allProducts = snapshot.data!.docs.map((doc) {
                           try {
                             return Product(
                               id: doc.id,
@@ -137,7 +155,11 @@ class _HomeScreenState extends State<HomeScreen> {
                           }
                         }).toList();
 
-                        return CategoryListScreen(products: products);
+                        if (_searchQuery.isEmpty) {
+                          _filteredProducts = _allProducts;
+                        }
+
+                        return CategoryListScreen(products: _filteredProducts);
                       },
                     )
                         : Center(child: CircularProgressIndicator()),
@@ -241,9 +263,6 @@ class CategoryCard extends StatelessWidget {
     return DateTime(2100, 1, 1);
   }
 }
-
-
-
 
 class Product {
   final String id;
