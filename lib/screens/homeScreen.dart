@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:food_delivery_app/widgets/customNavBar.dart';
 import '../const/colors.dart';
 import '../utils/helper.dart';
+import '../widgets/customNavBar.dart';
 import 'reminderDetail.dart';
 import 'package:intl/intl.dart';
 

@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:food_delivery_app/widgets/customNavBar.dart';
+import '../widgets/customNavBar.dart';
 import 'editProfileScreen.dart';
 
 class ProfileScreen extends StatefulWidget {

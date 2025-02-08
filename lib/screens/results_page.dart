@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:food_delivery_app/screens/scan_screen.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:product_pulse/screens/scan_screen.dart';
 import '../models/product_info.dart';
 import 'dart:io';
 

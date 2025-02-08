@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:product_pulse/screens/landingScreen.dart';
 import '../const/colors.dart';
 import '../utils/helper.dart';
-import 'homeScreen.dart';
 
 class IntroScreen extends StatefulWidget {
   const IntroScreen({super.key});
@@ -95,7 +95,7 @@ class _IntroScreenState extends State<IntroScreen> {
                   ],
                 ),
                 SizedBox(height: 30,),
-                Text(_pages[count]["title"]!, style: Helper.getTheme(context).titleLarge,),
+                Center(child: Text(_pages[count]["title"]!, style: Helper.getTheme(context).titleLarge,)),
                 SizedBox(height: 30,),
                 Text(_pages[count]["desc"]!, textAlign: TextAlign.center,),
                 SizedBox(height: 30,),
@@ -104,7 +104,7 @@ class _IntroScreenState extends State<IntroScreen> {
                   width: double.infinity,
                   child: ElevatedButton(
                     onPressed: () {
-                      Navigator.of(context).pushReplacementNamed(HomeScreen.routeName);
+                      Navigator.of(context).pushReplacementNamed(LandingScreen.routeName);
                     },
                     child: Text("Next"),
                   ),

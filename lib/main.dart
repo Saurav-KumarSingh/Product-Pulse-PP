@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:product_pulse/ProductUpload.dart';
+import 'package:product_pulse/screens/productScreen.dart';
 import 'firebase_options.dart';
-import 'package:food_delivery_app/ProductUpload.dart';
-import 'package:food_delivery_app/screens/productScreen.dart';
 import 'screens/splashScreen.dart';
 import 'screens/landingScreen.dart';
 import 'screens/loginScreen.dart';

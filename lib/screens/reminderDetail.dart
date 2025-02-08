@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import '../const/colors.dart';
 import '../utils/helper.dart';
-import 'package:food_delivery_app/screens/homeScreen.dart';
+
+import 'homeScreen.dart';
 
 class ProductDetailPage extends StatelessWidget {
   final Product product;

@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:food_delivery_app/screens/introScreen.dart';
 import '../utils/helper.dart';
+import 'introScreen.dart';
     
 class Splashscreen extends StatefulWidget {
   const Splashscreen({super.key});
