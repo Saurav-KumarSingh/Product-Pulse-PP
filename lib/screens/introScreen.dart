@@ -48,68 +48,72 @@ class _IntroScreenState extends State<IntroScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        height: Helper.getScreenHeight(context),
-        width: Helper.getScreenWidth(context),
-        child: SafeArea(
-          child: Container(
-            padding: EdgeInsets.symmetric(horizontal: 40, vertical: 30),
-            child: Column(
-              children: [
-                Container(
-                  height: 400,
-                  width: double.infinity,
-                  child: PageView.builder(
-                    controller: _controller,
-                    onPageChanged: (value) {
-                      setState(() {
-                        count = value;
-                      });
-                    },
-                    itemBuilder: (context, index) {
-                        return Image.asset(Helper.getAssetName(
-                            _pages[index]["image"]!, "virtual"
-                        )
-                        );
+      body: SingleChildScrollView(
+        child: Container(
+          height: Helper.getScreenHeight(context),
+          width: Helper.getScreenWidth(context),
+          child: SafeArea(
+            child: Container(
+              padding: EdgeInsets.symmetric(horizontal: 40, vertical: 30),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Container(
+                    height: 400,
+                    width: double.infinity,
+                    child: PageView.builder(
+                      controller: _controller,
+                      onPageChanged: (value) {
+                        setState(() {
+                          count = value;
+                        });
                       },
-                      itemCount: _pages.length,
+                      itemBuilder: (context, index) {
+                          return Image.asset(Helper.getAssetName(
+                              _pages[index]["image"]!, "virtual"
+                          )
+                          );
+                        },
+                        itemCount: _pages.length,
+                    ),
                   ),
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    CircleAvatar(
-                      radius: 5,
-                      backgroundColor: count == 0 ? AppColor.orange : AppColor.placeholderbg,
-                    ),
-                    SizedBox(width: 5,),
-                    CircleAvatar(
-                      radius: 5,
-                      backgroundColor: count == 1 ? AppColor.orange : AppColor.placeholderbg,
-                    ),
-                    SizedBox(width: 5,),
-                    CircleAvatar(
-                      radius: 5,
-                      backgroundColor: count == 2 ? AppColor.orange : AppColor.placeholderbg,
-                    ),
-                  ],
-                ),
-                SizedBox(height: 30,),
-                Center(child: Text(_pages[count]["title"]!, style: Helper.getTheme(context).titleLarge,)),
-                SizedBox(height: 30,),
-                Text(_pages[count]["desc"]!, textAlign: TextAlign.center,),
-                SizedBox(height: 30,),
-                SizedBox(
-                  height: 50,
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: () {
-                      Navigator.of(context).pushReplacementNamed(LandingScreen.routeName);
-                    },
-                    child: Text("Next"),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      CircleAvatar(
+                        radius: 5,
+                        backgroundColor: count == 0 ? AppColor.orange : AppColor.placeholderbg,
+                      ),
+                      SizedBox(width: 5,),
+                      CircleAvatar(
+                        radius: 5,
+                        backgroundColor: count == 1 ? AppColor.orange : AppColor.placeholderbg,
+                      ),
+                      SizedBox(width: 5,),
+                      CircleAvatar(
+                        radius: 5,
+                        backgroundColor: count == 2 ? AppColor.orange : AppColor.placeholderbg,
+                      ),
+                    ],
                   ),
-                )
-              ],
+                  SizedBox(height: 30,),
+                  Center(child: Text(_pages[count]["title"]!, style: Helper.getTheme(context).titleLarge,textAlign: TextAlign.center,)),
+                  SizedBox(height: 30,),
+                  Text(_pages[count]["desc"]!, textAlign: TextAlign.center,),
+                  SizedBox(height: 30,),
+                  SizedBox(
+                      height: 50,
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        onPressed: () {
+                          Navigator.of(context).pushReplacementNamed(LandingScreen.routeName);
+                        },
+                        child: Text("Next"),
+                      ),
+                    ),
+
+                ],
+              ),
             ),
           ),
         ),
