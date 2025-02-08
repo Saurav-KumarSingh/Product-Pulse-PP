@@ -87,10 +87,10 @@ class _ProductOfferScreenState extends State<ProductOfferScreen> {
                     padding: const EdgeInsets.only(top: 16, left: 10, right: 10, bottom: 100),
                     child: GridView.builder(
                       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 2,
+                        crossAxisCount: MediaQuery.of(context).size.width > 600 ? 3 : 2,
                         crossAxisSpacing: 10.0,
                         mainAxisSpacing: 20.0,
-                        childAspectRatio: 0.55,
+                        childAspectRatio: MediaQuery.of(context).size.width > 600 ? 0.8 : 0.55,
                       ),
                       itemCount: filteredProducts.length,
                       itemBuilder: (context, index) {
@@ -174,24 +174,29 @@ class ProductCard extends StatelessWidget {
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
                   ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
-                SizedBox(height: 8),
-                Text(
-                  "Actual Price: ₹ $price",
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Colors.orange,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                SizedBox(height: 8),
-                Text(
-                  "Selling Price: ₹ $sellingPrice",
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Colors.green,
-                    fontWeight: FontWeight.bold,
-                  ),
+                SizedBox(height: 5),
+                Row(
+                  children: [
+                    Flexible(
+                      child: Row(
+                        children: [
+                          Text('Price: ', style: TextStyle(fontSize: 14, color: Colors.black, fontWeight: FontWeight.bold,)),
+                          Text(
+                            "₹$price",
+                            style: TextStyle(fontSize: 15, color: Colors.red, fontWeight: FontWeight.bold, decoration: TextDecoration.lineThrough),
+                          ),
+                          SizedBox(width: 4),
+                          Text(
+                            "₹$sellingPrice",
+                            style: TextStyle(fontSize: 15, color: Colors.green, fontWeight: FontWeight.bold),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
                 SizedBox(height: 8),
                 Row(
