@@ -47,6 +47,7 @@ dependencies:
   flutter_markdown:
   shared_preferences:
   ikchatbot:
+  flutter_tts: ^4.2.2
 
 
   # The following adds the Cupertino Icons font to your application.

@@ -6,6 +6,7 @@ import 'package:product_pulse/screens/homeScreen.dart';
 import 'package:product_pulse/screens/scan_screen.dart';
 import '../models/product_info.dart';
 import 'dart:io';
+import 'package:flutter_tts/flutter_tts.dart';
 
 import '../widgets/uploadFile.dart';
 
@@ -38,6 +39,7 @@ class _ResultsPageState extends State<ResultsPage> {
   final _dateController = TextEditingController();
   final _nameController = TextEditingController();
   final _descriptionController = TextEditingController();
+  final FlutterTts flutterTts = FlutterTts();
 
   @override
   void initState() {
@@ -53,6 +55,7 @@ class _ResultsPageState extends State<ResultsPage> {
         _imageFile = File(widget.productInfo!.imageUrl!); // Local path
       }
     }
+    _initTts();
   }
 
   @override
@@ -60,6 +63,7 @@ class _ResultsPageState extends State<ResultsPage> {
     _dateController.dispose();
     _nameController.dispose();
     _descriptionController.dispose();
+    flutterTts.stop();
     super.dispose();
   }
 
@@ -205,6 +209,16 @@ class _ResultsPageState extends State<ResultsPage> {
     }
   }
 
+  Future<void> _initTts() async {
+    await flutterTts.setLanguage("en-US");
+    await flutterTts.setSpeechRate(0.5);
+    await flutterTts.setVolume(1.0);
+    await flutterTts.setPitch(1.0);
+  }
+
+  Future<void> _speak(String text) async {
+    await flutterTts.speak(text);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -300,9 +314,20 @@ class _ResultsPageState extends State<ResultsPage> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Expanded(
-                        child: Text(
-                          _editedName ?? 'No name available',
-                          overflow: TextOverflow.ellipsis,
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                _editedName ?? 'No name available',
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                            IconButton(
+                              icon: const Icon(Icons.volume_up),
+                              onPressed: () => _speak(_editedName ?? 'No name available'),
+                              color: Colors.blue,
+                            ),
+                          ],
                         ),
                       ),
                       IconButton(
@@ -343,9 +368,20 @@ class _ResultsPageState extends State<ResultsPage> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Expanded(
-                        child: Text(
-                          _editedDescription ?? 'No description available',
-                          overflow: TextOverflow.ellipsis,
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                _editedDescription ?? 'No description available',
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                            IconButton(
+                              icon: const Icon(Icons.volume_up),
+                              onPressed: () => _speak(_editedDescription ?? 'No description available'),
+                              color: Colors.blue,
+                            ),
+                          ],
                         ),
                       ),
                       IconButton(
@@ -385,14 +421,23 @@ class _ResultsPageState extends State<ResultsPage> {
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    if (!_isEditingDate) ...[
-                      IconButton(
-                        icon: const Icon(Icons.edit),
-                        onPressed: _editExpiryDate,
-                        tooltip: 'Edit Date',
-                        color: Colors.blue,
-                      ),
-                    ],
+                    Row(
+                      children: [
+                        if (_currentExpiryDate != null)
+                          IconButton(
+                            icon: const Icon(Icons.volume_up),
+                            onPressed: () => _speak('Expiry date is ${_currentExpiryDate}'),
+                            color: Colors.blue,
+                          ),
+                        if (!_isEditingDate)
+                          IconButton(
+                            icon: const Icon(Icons.edit),
+                            onPressed: _editExpiryDate,
+                            tooltip: 'Edit Date',
+                            color: Colors.blue,
+                          ),
+                      ],
+                    ),
                   ],
                 ),
                 if (_currentExpiryDate != null)
