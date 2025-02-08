@@ -166,6 +166,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
               SizedBox(height: 40),
 
+
               // Update Button
               ElevatedButton(
                 onPressed: _updateProfile,
