@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:product_pulse/screens/profileScreen.dart';
 import '../widgets/customTextInput.dart';
 import '../widgets/uploadFile.dart';
 
@@ -71,8 +72,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           'address': _addressController.text,
         });
 
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Profile updated successfully')));
-        Navigator.pop(context);
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Profile updated successfully'),backgroundColor: Colors.green,));
+        Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>ProfileScreen()));
       }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error updating profile: $e')));
@@ -105,11 +106,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           setState(() {
             _profileImageUrl = imageUrl;
           });
-
-          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Profile image updated successfully!')));
         }
       } catch (e) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error uploading image: $e')));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error uploading image: $e'),backgroundColor: Colors.red,));
       } finally {
         setState(() => _isLoading = false);
       }

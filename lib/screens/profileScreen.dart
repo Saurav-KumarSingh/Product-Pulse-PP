@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:product_pulse/screens/help_support.dart';
 import 'package:product_pulse/screens/loginScreen.dart';
 import '../widgets/customNavBar.dart';
 import 'editProfileScreen.dart';
@@ -22,6 +23,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   String _address = '';
   String? _profileImageUrl;
   bool _isLoading = true;
+  String _errorMessage = '';
 
   @override
   void initState() {
@@ -33,17 +35,35 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Future<void> _fetchAuthenticatedUserDetails() async {
     User? currentUser = _auth.currentUser;
     if (currentUser != null) {
-      DocumentSnapshot userDoc = await _firestore.collection('users').doc(currentUser.uid).get();
-      if (userDoc.exists) {
+      try {
+        DocumentSnapshot userDoc = await _firestore.collection('users').doc(currentUser.uid).get();
+        if (userDoc.exists) {
+          print(userDoc);
+          setState(() {
+            _name = userDoc['name'] ?? '';
+            _email = userDoc['email'] ?? '';
+            _mobile = userDoc['mobile'] ?? '';
+            _address = userDoc['address'] ?? '';
+            _profileImageUrl = userDoc['profileImage'] ?? '';
+            _isLoading = false;
+          });
+        } else {
+          setState(() {
+            _isLoading = false;
+            _errorMessage = 'User data not found.';
+          });
+        }
+      } catch (error) {
         setState(() {
-          _name = userDoc['name'] ?? '';
-          _email = userDoc['email'] ?? '';
-          _mobile = userDoc['mobile'] ?? '';
-          _address = userDoc['address'] ?? '';
-          _profileImageUrl = userDoc['profileImage'] ?? '';
           _isLoading = false;
+          _errorMessage = 'Error fetching data: $error';
         });
       }
+    } else {
+      setState(() {
+        _isLoading = false;
+        _errorMessage = 'No user authenticated.';
+      });
     }
   }
 
@@ -70,7 +90,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     ),
                   ),
                   child: Center(
-                    child: Column(
+                    child: _isLoading
+                        ? CircularProgressIndicator() // Show loading spinner until data is fetched
+                        : Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         CircleAvatar(
@@ -106,9 +128,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   padding: const EdgeInsets.symmetric(horizontal: 40.0),
                   child: Column(
                     children: [
-                      _buildProfileDetail('Mobile:', _mobile),
-                      _buildProfileDetail('Address:', _address),
-                      SizedBox(height: 20),
+                      if (_errorMessage.isNotEmpty)
+                        Text(
+                          _errorMessage,
+                          style: TextStyle(color: Colors.red, fontSize: 16),
+                        ),
+                      if (!_isLoading && _errorMessage.isEmpty)
+                        Column(
+                          children: [
+                            _buildProfileDetail('Mobile:', _mobile),
+                            _buildProfileDetail('Address:', _address),
+                            SizedBox(height: 20),
+                          ],
+                        ),
                     ],
                   ),
                 ),
@@ -137,7 +169,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         icon: Icons.help,
                         title: 'Help & Support',
                         onTap: () {
-                          // Navigate to help screen
+                          Navigator.push(context, MaterialPageRoute(builder: (context) => HelpSupportScreen()));
                         },
                       ),
                       Divider(color: Colors.grey[300]),
