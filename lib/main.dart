@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:product_pulse/screens/chabotScreen.dart';
 import 'package:product_pulse/screens/productScreen.dart';
 import 'firebase_options.dart';
 import 'screens/splashScreen.dart';
@@ -90,6 +91,7 @@ class MyApp extends StatelessWidget {
         HomeScreen.routeName: (context) =>  HomeScreen(),
         ProfileScreen.routeName: (context) =>  ProfileScreen(),
         ProductOfferScreen.routeName:(context)=>ProductOfferScreen(),
+        ChatScreen.routeName:(context)=>ChatScreen(),
       },
     );
   }

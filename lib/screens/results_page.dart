@@ -7,6 +7,8 @@ import 'package:product_pulse/screens/scan_screen.dart';
 import '../models/product_info.dart';
 import 'dart:io';
 
+import '../widgets/uploadFile.dart';
+
 class ResultsPage extends StatefulWidget {
   final String? barcodeId;
   final String? expiryDate;
@@ -79,7 +81,7 @@ class _ResultsPageState extends State<ResultsPage> {
 
   Future<void> _editImage() async {
     final ImagePicker _picker = ImagePicker();
-    final XFile? pickedImage = await _picker.pickImage(source: ImageSource.gallery);
+    final XFile? pickedImage = await _picker.pickImage(source: ImageSource.camera);
 
     if (pickedImage != null) {
       setState(() {
@@ -99,24 +101,34 @@ class _ResultsPageState extends State<ResultsPage> {
       return;
     }
 
-    final productData = {
-      'barcodeId': widget.barcodeId,
-      'expiryDate': _currentExpiryDate,
-      'scannedText': widget.scannedText,
-      'productName': _editedName ?? widget.productInfo?.name,
-      'description': _editedDescription ?? widget.productInfo?.description,
-      'imageUrl': _imageFile?.path ?? widget.productInfo?.imageUrl ?? 'assets/images/dummy/img.png',
-      'timestamp': FieldValue.serverTimestamp(),
-    };
-
     try {
-      await firestore
-          .collection('users')
-          .doc(user.uid)
-          .collection('products')
-          .add(productData);
+      String? imageUrl = widget.productInfo?.imageUrl; // Get existing URL
 
-      await firestore.collection('publicProducts').add(productData);
+      // Upload only if a new local image is picked
+      if (_imageFile != null) {
+        imageUrl = await UploadService.uploadImageToCloudinary(_imageFile!);
+      }
+
+      // Save product data to Firestore
+      await firestore.collection('users').doc(user.uid).collection('products').add({
+        'barcodeId': widget.barcodeId,
+        'expiryDate': _currentExpiryDate,
+        'scannedText': widget.scannedText,
+        'productName': _editedName ?? widget.productInfo?.name,
+        'description': _editedDescription ?? widget.productInfo?.description,
+        'imageUrl': imageUrl ?? 'assets/images/dummy/img.png', // Keep asset images as is
+        'timestamp': FieldValue.serverTimestamp(),
+      });
+
+      await firestore.collection('publicProducts').add({
+        'barcodeId': widget.barcodeId,
+        'expiryDate': _currentExpiryDate,
+        'scannedText': widget.scannedText,
+        'productName': _editedName ?? widget.productInfo?.name,
+        'description': _editedDescription ?? widget.productInfo?.description,
+        'imageUrl': imageUrl ?? 'assets/images/dummy/img.png', // Keep asset images as is
+        'timestamp': FieldValue.serverTimestamp(),
+      });
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Product saved successfully!')),
@@ -135,6 +147,7 @@ class _ResultsPageState extends State<ResultsPage> {
     }
   }
 
+
   Future<void> _saveToFirestore2() async {
     final user = FirebaseAuth.instance.currentUser;
     final firestore = FirebaseFirestore.instance;
@@ -146,36 +159,52 @@ class _ResultsPageState extends State<ResultsPage> {
       return;
     }
 
-    final productData = {
-      'barcodeId': widget.barcodeId,
-      'expiryDate': _currentExpiryDate,
-      'scannedText': widget.scannedText,
-      'productName': _editedName ?? widget.productInfo?.name,
-      'description': _editedDescription ?? widget.productInfo?.description,
-      'imageUrl': _imageFile?.path ?? widget.productInfo?.imageUrl ?? 'assets/images/dummy/img.png',
-      'timestamp': FieldValue.serverTimestamp(),
-    };
-
     try {
-      await firestore
-          .collection('users')
-          .doc(user.uid)
-          .collection('products')
-          .add(productData);
+      String? imageUrl = widget.productInfo?.imageUrl; // Get existing URL
 
-      await firestore.collection('publicProducts').add(productData);
+      // Upload only if a new local image is picked
+      if (_imageFile != null) {
+        imageUrl = await UploadService.uploadImageToCloudinary(_imageFile!);
+      }
+
+      // Save product data to Firestore
+      await firestore.collection('users').doc(user.uid).collection('products').add({
+        'barcodeId': widget.barcodeId,
+        'expiryDate': _currentExpiryDate,
+        'scannedText': widget.scannedText,
+        'productName': _editedName ?? widget.productInfo?.name,
+        'description': _editedDescription ?? widget.productInfo?.description,
+        'imageUrl': imageUrl ?? 'assets/images/dummy/img.png', // Keep asset images as is
+        'timestamp': FieldValue.serverTimestamp(),
+      });
+
+      await firestore.collection('publicProducts').add({
+        'barcodeId': widget.barcodeId,
+        'expiryDate': _currentExpiryDate,
+        'scannedText': widget.scannedText,
+        'productName': _editedName ?? widget.productInfo?.name,
+        'description': _editedDescription ?? widget.productInfo?.description,
+        'imageUrl': imageUrl ?? 'assets/images/dummy/img.png', // Keep asset images as is
+        'timestamp': FieldValue.serverTimestamp(),
+      });
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Product saved successfully!')),
       );
-      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>HomeScreen()));
 
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => HomeScreen(),
+        ),
+      );
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Failed to save product: $e')),
       );
     }
   }
+
 
   @override
   Widget build(BuildContext context) {

@@ -19,7 +19,7 @@ class _CustomNavBarState extends State<CustomNavBar> {
     '/homePage': 0,
     '/offerPage': 1,
     '/profilePage': 2,
-    '/uploadProduct': 3,
+    '/chatbot': 3,
   };
 
   // PageStorageBucket to maintain the state of each screen
@@ -55,7 +55,7 @@ class _CustomNavBarState extends State<CustomNavBar> {
         Navigator.pushNamed(context, '/profilePage');
         break;
       case 3:
-        Navigator.pushNamed(context, '/uploadProduct');
+        Navigator.pushNamed(context, '/chatbot');
         break;
     }
   }
@@ -97,11 +97,11 @@ class _CustomNavBarState extends State<CustomNavBar> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  _buildNavItem(0, "home.png", "Home"),
-                  _buildNavItem(1, "bag.png", "Offers"),
+                  _buildNavItem(0, "home.png"),
+                  _buildNavItem(1, "bag.png"),
                   const SizedBox(width: 35), // Spacer for the FAB
-                  _buildNavItem(2, "user.png", "Profile"),
-                  _buildNavItem(3, "menu.png", "More"),
+                  _buildNavItem(2, "user.png"),
+                  _buildNavItem(3, "bot.png"),
                 ],
               ),
             ),
@@ -138,28 +138,22 @@ class _CustomNavBarState extends State<CustomNavBar> {
     );
   }
 
-  Widget _buildNavItem(int index, String iconName, String label) {
+  Widget _buildNavItem(int index, String iconName) {
     return GestureDetector(
       onTap: () => _onItemTapped(index),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Container(
-            width: 20,
-            height: 20,
+            width: 23,
+            height: 23,
             child: Image.asset(
               Helper.getAssetName(iconName, "virtual"),
               fit: BoxFit.cover,
               color: _selectedIndex == index ? AppColor.orange : Colors.grey, // Change color based on selection
             ),
           ),
-          const SizedBox(height: 10),
-          Text(
-            label,
-            style: TextStyle(
-              color: _selectedIndex == index ? AppColor.orange : Colors.grey, // Change text color based on selection
-            ),
-          ),
+
         ],
       ),
     );

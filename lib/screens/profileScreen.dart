@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:product_pulse/screens/loginScreen.dart';
 import '../widgets/customNavBar.dart';
 import 'editProfileScreen.dart';
 
@@ -19,17 +20,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
   String _email = '';
   String _mobile = '';
   String _address = '';
-  String? _profileImageUrl; // Store the profile image URL
+  String? _profileImageUrl;
   bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
-    _fetchUserData();
+    _fetchAuthenticatedUserDetails();
   }
 
-  // Fetch the current user's data from Firestore
-  Future<void> _fetchUserData() async {
+  // Fetch authenticated user's details from Firebase Authentication
+  Future<void> _fetchAuthenticatedUserDetails() async {
     User? currentUser = _auth.currentUser;
     if (currentUser != null) {
       DocumentSnapshot userDoc = await _firestore.collection('users').doc(currentUser.uid).get();
@@ -39,7 +40,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           _email = userDoc['email'] ?? '';
           _mobile = userDoc['mobile'] ?? '';
           _address = userDoc['address'] ?? '';
-          _profileImageUrl = userDoc['profileImage'] ?? ''; // Fetch profile image URL
+          _profileImageUrl = userDoc['profileImage'] ?? '';
           _isLoading = false;
         });
       }
@@ -144,7 +145,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         icon: Icons.logout,
                         title: 'Logout',
                         onTap: () {
-                          // Handle logout
+                          Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>LoginScreen()));
                         },
                         isLogout: true,
                       ),
