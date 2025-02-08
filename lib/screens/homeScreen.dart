@@ -6,6 +6,7 @@ import '../utils/helper.dart';
 import '../widgets/customNavBar.dart';
 import 'reminderDetail.dart';
 import 'package:intl/intl.dart';
+import 'notificationScreen.dart';
 
 class HomeScreen extends StatefulWidget {
   HomeScreen({super.key});
@@ -84,12 +85,24 @@ class _HomeScreenState extends State<HomeScreen> {
                   children: [
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 20),
-                      child: Text(
-                        "Good morning\n$userName!",
-                        style: Theme.of(context).textTheme.headlineSmall,
+                      child: Row(
+                        children: [
+                          Text(
+                            "Good morning\n$userName!",
+                            style: Theme.of(context).textTheme.headlineSmall,
+                          ),
+                          Spacer(),
+                          IconButton(
+                            icon: const Icon(Icons.notifications, color: AppColor.orange, size: 32,),
+                            onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context)=>NotificationScreen())),
+                            color: Colors.blue,
+                          ),
+
+                        ],
                       ),
                     ),
                     SizedBox(height: 30),
+
                     Padding(
                       padding: EdgeInsets.symmetric(horizontal: 20),
                       child: Container(

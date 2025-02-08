@@ -15,6 +15,7 @@ import 'screens/newPwScreen.dart';
 import 'screens/introScreen.dart';
 import 'screens/homeScreen.dart';
 import 'screens/profileScreen.dart';
+import 'screens/notificationScreen.dart';
 
 void main()async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -92,6 +93,7 @@ class MyApp extends StatelessWidget {
         ProfileScreen.routeName: (context) =>  ProfileScreen(),
         ProductOfferScreen.routeName:(context)=>ProductOfferScreen(),
         ChatScreen.routeName:(context)=>ChatScreen(),
+        NotificationScreen.routeName:(context)=>NotificationScreen(),
       },
     );
   }
