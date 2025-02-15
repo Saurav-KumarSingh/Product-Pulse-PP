@@ -16,19 +16,16 @@ import 'screens/introScreen.dart';
 import 'screens/homeScreen.dart';
 import 'screens/profileScreen.dart';
 import 'screens/notificationScreen.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
-void main()async {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+  await Firebase.initializeApp();
   await dotenv.load(fileName: ".env");
-  runApp(const MyApp());
+  runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -80,7 +77,7 @@ class MyApp extends StatelessWidget {
           ),
         ),
       ),
-      home: const Splashscreen(),
+      home: Splashscreen(),
       routes: {
         LandingScreen.routeName: (context) => const LandingScreen(),
         LoginScreen.routeName: (context) => const LoginScreen(),

@@ -176,9 +176,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       _buildProfileOption(
                         icon: Icons.logout,
                         title: 'Logout',
-                        onTap: () {
-                          Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>LoginScreen()));
-                        },
+                        onTap: _signOut,
                         isLogout: true,
                       ),
                     ],
@@ -252,5 +250,66 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ],
       ),
     );
+  }
+
+  // Add this method to handle sign out
+  Future<void> _signOut() async {
+    // Show confirmation dialog
+    bool? confirmLogout = await showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Confirm Logout'),
+          content: const Text('Are you sure you want to logout?'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: const Text('Cancel', style: TextStyle(color: Colors.grey)),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(true),
+              child: const Text('Logout', style: TextStyle(color: Colors.red)),
+            ),
+          ],
+        );
+      },
+    );
+
+    // If user confirmed logout
+    if (confirmLogout == true) {
+      try {
+        // Show loading dialog
+        showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (context) => const Center(
+            child: CircularProgressIndicator(),
+          ),
+        );
+
+        // Sign out from Firebase
+        await FirebaseAuth.instance.signOut();
+
+        // Close loading dialog
+        Navigator.pop(context);
+
+        if (mounted) {
+          // Navigate to login screen and remove all previous routes
+          Navigator.pushNamedAndRemoveUntil(
+            context, 
+            '/loginScreen', 
+            (route) => false
+          );
+        }
+      } catch (e) {
+        // Close loading dialog
+        Navigator.pop(context);
+        
+        // Show error message
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error signing out: $e')),
+        );
+      }
+    }
   }
 }

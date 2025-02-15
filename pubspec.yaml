@@ -45,7 +45,7 @@ dependencies:
   intl: ^0.18.0
   google_generative_ai:
   flutter_markdown:
-  shared_preferences:
+  shared_preferences: ^2.2.2
   ikchatbot:
   flutter_tts: ^4.2.2
 

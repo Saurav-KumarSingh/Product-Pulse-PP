@@ -99,11 +99,22 @@ class _ScanScreenState extends State<ScanScreen> {
               }
             } else {
               // Manual entry
-              productInfo = await Navigator.push(
+              Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => ManualEntryPage(
-                    expiryDate: expiryDate,
+                  builder: (context) => ResultsPage(
+                    productInfo: ProductInfo(
+                      name: '',
+                      description: '',
+                      imageUrl: 'assets/images/dummy/img.png',
+                      brand: '',
+                      category: '',
+                      manufacturer: '',
+                      stores: '',
+                      price: '',
+                    ),
+                    expiryDate: '',
+                    scannedText: '',
                   ),
                 ),
               );
