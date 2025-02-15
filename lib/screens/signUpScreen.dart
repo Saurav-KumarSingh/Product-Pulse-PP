@@ -58,19 +58,37 @@ class _SignUpScreenState extends State<SignUpScreen> {
         password: password,
       );
 
-      // Store User Data in Firestore
+      // Store User Data in Firestore with all required fields
       await _firestore.collection("users").doc(userCredential.user!.uid).set({
         "name": name,
         "email": email,
         "mobile": mobile,
         "address": address,
         "uid": userCredential.user!.uid,
+        "profileImage": "", // Add default empty profile image
+        "createdAt": FieldValue.serverTimestamp(),
+        "updatedAt": FieldValue.serverTimestamp(),
       });
 
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Signup Successful!"),backgroundColor: Colors.green,));
-      Navigator.of(context).pushReplacementNamed(HomeScreen.routeName);
+      // Show success message
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("Signup Successful!"),
+          backgroundColor: Colors.green,
+        )
+      );
+
+      // Navigate to home screen
+      if (mounted) {
+        Navigator.of(context).pushNamedAndRemoveUntil(
+          HomeScreen.routeName,
+          (route) => false
+        );
+      }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString())));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(e.toString()))
+      );
     } finally {
       setState(() {
         _isLoading = false;

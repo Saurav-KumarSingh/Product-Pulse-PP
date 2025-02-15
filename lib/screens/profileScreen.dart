@@ -36,16 +36,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
     User? currentUser = _auth.currentUser;
     if (currentUser != null) {
       try {
-        DocumentSnapshot userDoc = await _firestore.collection('users').doc(currentUser.uid).get();
+        DocumentSnapshot userDoc = await _firestore
+            .collection('users')
+            .doc(currentUser.uid)
+            .get();
+
         if (userDoc.exists) {
-          print(userDoc);
+          final data = userDoc.data() as Map<String, dynamic>;
           setState(() {
-            _name = userDoc['name'] ?? '';
-            _email = userDoc['email'] ?? '';
-            _mobile = userDoc['mobile'] ?? '';
-            _address = userDoc['address'] ?? '';
-            _profileImageUrl = userDoc['profileImage'] ?? '';
+            _name = data['name'] ?? 'No name';
+            _email = data['email'] ?? 'No email';
+            _mobile = data['mobile'] ?? 'No mobile';
+            _address = data['address'] ?? 'No address';
+            _profileImageUrl = data['profileImage'] ?? '';
             _isLoading = false;
+            _errorMessage = '';
           });
         } else {
           setState(() {
@@ -54,9 +59,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
           });
         }
       } catch (error) {
+        print('Error fetching user data: $error');
         setState(() {
           _isLoading = false;
-          _errorMessage = 'Error fetching data';
+          _errorMessage = 'Error fetching data: $error';
         });
       }
     } else {
