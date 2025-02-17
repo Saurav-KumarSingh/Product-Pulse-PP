@@ -56,12 +56,12 @@ Consumers often:
   <img src="assets/screenshots/login.jpg" width="30%">
 </p>
 
-#### Product & Profile Screens
+#### Home & Product Screen
 <p align="center">
   <img src="assets/screenshots/home.jpg" width="24%">
+  <img src="assets/screenshots/prcartdetail.jpg" width="24%">
   <img src="assets/screenshots/productcart.jpg" width="24%">
   <img src="assets/screenshots/prinfo.jpg" width="24%">
-  <img src="assets/screenshots/prcartdetail.jpg" width="24%">
 </p>
 
 #### Profile & Chat Screens
