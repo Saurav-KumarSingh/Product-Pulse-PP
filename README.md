@@ -43,23 +43,33 @@ Consumers often:
 
 ### Screenshots
 
-![Splash Screen](assets/screenshots/splash.jpg)
+#### Splash & Welcome Screens
+<p align="center">
+  <img src="assets/screenshots/splash.jpg" width="30%">
+  <img src="assets/screenshots/welcome.jpg" width="30%">
+  <img src="assets/screenshots/welcomeb.jpg" width="30%">
+</p>
 
-![Welcome Screen](assets/screenshots/welcome.jpg)
-![Welcome Screen](assets/screenshots/welcomeb.jpg)
-![Welcome Screen](assets/screenshots/welcomec.jpg)
+#### Authentication Screens
+<p align="center">
+  <img src="assets/screenshots/signup.jpg" width="30%">
+  <img src="assets/screenshots/login.jpg" width="30%">
+</p>
 
-![Auth Screen](assets/screenshots/signup.jpg)
-![Auth Screen](assets/screenshots/login.jpg)
+#### Product & Profile Screens
+<p align="center">
+  <img src="assets/screenshots/home.jpg" width="24%">
+  <img src="assets/screenshots/productcart.jpg" width="24%">
+  <img src="assets/screenshots/prinfo.jpg" width="24%">
+  <img src="assets/screenshots/prcartdetail.jpg" width="24%">
+</p>
 
-![Home Screen](assets/screenshots/home.jpg)
-![Product Screen](assets/screenshots/productcart.jpg)
-![Product Screen](assets/screenshots/prinfo.jpg)
-![Product Screen](assets/screenshots/prcartdetail.jpg)
-![Profile Screen](assets/screenshots/profile.jpg)
-![Profile Screen](assets/screenshots/editprofile.jpg)
-![Chat Screen](assets/screenshots/cb.jpg)
-
+#### Profile & Chat Screens
+<p align="center">
+  <img src="assets/screenshots/profile.jpg" width="30%">
+  <img src="assets/screenshots/editprofile.jpg" width="30%">
+  <img src="assets/screenshots/cb.jpg" width="30%">
+</p>
 
 ### Conclusion
 🚀 Never eat, take, or apply expired products again!
@@ -88,7 +98,6 @@ Consumers often:
 - **Saurav Kumar Singh** - Developer
 - **Prashant** - Developer
 - **Muskan Puja** - UI/UX & Frontend
-
 
 ---
 🌟 *Hold the Pulse of Your Products!* 🌟
