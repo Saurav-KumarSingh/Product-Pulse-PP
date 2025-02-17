@@ -45,9 +45,10 @@ Consumers often:
 
 #### Splash & Welcome Screens
 <p align="center">
-  <img src="assets/screenshots/splash.jpg" width="30%">
-  <img src="assets/screenshots/welcome.jpg" width="30%">
-  <img src="assets/screenshots/welcomeb.jpg" width="30%">
+  <img src="assets/screenshots/splash.jpg" width="24%">
+  <img src="assets/screenshots/welcome.jpg" width="24%">
+  <img src="assets/screenshots/welcomeb.jpg" width="24%">
+  <img src="assets/screenshots/welcomec.jpg" width="24%">
 </p>
 
 #### Authentication Screens
