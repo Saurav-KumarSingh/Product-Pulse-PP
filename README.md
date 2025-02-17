@@ -96,7 +96,7 @@ Consumers often:
    ```
 
 ## Contributors
-- [**Saurav Kumar Singh**](https://github.com/sauravksingh) - Developer
+- [**Saurav Kumar Singh**](https://github.com/Saurav-KumarSingh) - Developer
 - [**Prashant**](https://github.com/prashant19092004) - Developer
 ---
 🌟 *Hold the Pulse of Your Products!* 🌟
