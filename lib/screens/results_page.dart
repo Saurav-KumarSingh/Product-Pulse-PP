@@ -47,12 +47,16 @@ class _ResultsPageState extends State<ResultsPage> {
     _currentExpiryDate = widget.expiryDate;
     _editedName = widget.productInfo?.name;
     _editedDescription = widget.productInfo?.description;
+    
+    // Initialize controllers with existing values
+    _nameController.text = _editedName ?? '';
+    _descriptionController.text = _editedDescription ?? '';
 
     if (widget.productInfo?.imageUrl != null && widget.productInfo!.imageUrl!.isNotEmpty) {
       if (widget.productInfo!.imageUrl!.startsWith('http')) {
-        _imageFile = null; // If it's a network URL
+        _imageFile = null;
       } else {
-        _imageFile = File(widget.productInfo!.imageUrl!); // Local path
+        _imageFile = File(widget.productInfo!.imageUrl!);
       }
     }
     _initTts();
@@ -95,117 +99,205 @@ class _ResultsPageState extends State<ResultsPage> {
   }
 
   Future<void> _saveToFirestore() async {
-    final user = FirebaseAuth.instance.currentUser;
-    final firestore = FirebaseFirestore.instance;
-
-    if (user == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('You must be logged in to save data!')),
-      );
-      return;
-    }
+    if (!mounted) return;
 
     try {
-      String? imageUrl = widget.productInfo?.imageUrl; // Get existing URL
-
-      // Upload only if a new local image is picked
-      if (_imageFile != null) {
-        imageUrl = await UploadService.uploadImageToCloudinary(_imageFile!);
+      final user = FirebaseAuth.instance.currentUser;
+      if (user == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Please login to save products')),
+        );
+        return;
       }
 
-      // Save product data to Firestore
-      await firestore.collection('users').doc(user.uid).collection('products').add({
-        'barcodeId': widget.barcodeId,
-        'expiryDate': _currentExpiryDate,
-        'scannedText': widget.scannedText,
-        'productName': _editedName ?? widget.productInfo?.name,
-        'description': _editedDescription ?? widget.productInfo?.description,
-        'imageUrl': imageUrl ?? 'assets/images/dummy/img.png', // Keep asset images as is
-        'timestamp': FieldValue.serverTimestamp(),
-      });
-
-      await firestore.collection('publicProducts').add({
-        'barcodeId': widget.barcodeId,
-        'expiryDate': _currentExpiryDate,
-        'scannedText': widget.scannedText,
-        'productName': _editedName ?? widget.productInfo?.name,
-        'description': _editedDescription ?? widget.productInfo?.description,
-        'imageUrl': imageUrl ?? 'assets/images/dummy/img.png', // Keep asset images as is
-        'timestamp': FieldValue.serverTimestamp(),
-      });
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Product saved successfully!')),
+      // Show loading indicator
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => const Center(
+          child: CircularProgressIndicator(),
+        ),
       );
 
-      Navigator.push(
+      String? imageUrl;
+      // Handle image upload first
+      if (_imageFile != null) {
+        try {
+          imageUrl = await UploadService.uploadImageToCloudinary(_imageFile!);
+        } catch (e) {
+          print('Error uploading image: $e');
+          imageUrl = 'assets/images/dummy/img.png';
+        }
+      }
+
+      // Prepare product data with all required fields
+      final productData = {
+        if (widget.barcodeId != null && widget.barcodeId!.isNotEmpty)
+          'barcodeId': widget.barcodeId,
+        'productName': _nameController.text.isNotEmpty 
+            ? _nameController.text 
+            : (widget.productInfo?.name ?? 'No name'),
+        'description': _descriptionController.text.isNotEmpty 
+            ? _descriptionController.text 
+            : (widget.productInfo?.description ?? ''),
+        'expiryDate': _currentExpiryDate,
+        'scannedText': widget.scannedText,
+        'imageUrl': imageUrl ?? widget.productInfo?.imageUrl ?? 'assets/images/dummy/img.png',
+        'timestamp': FieldValue.serverTimestamp(),
+        'brand': widget.productInfo?.brand ?? '',
+        'category': widget.productInfo?.category ?? '',
+        'manufacturer': widget.productInfo?.manufacturer ?? '',
+        'stores': widget.productInfo?.stores ?? '',
+        'price': widget.productInfo?.price ?? '',
+      };
+
+      // Use batch write
+      final batch = FirebaseFirestore.instance.batch();
+      
+      // Add to user's products
+      final userProductRef = FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .collection('products')
+          .doc();
+      batch.set(userProductRef, productData);
+
+      // Add to public products
+      final publicProductRef = FirebaseFirestore.instance
+          .collection('publicProducts')
+          .doc();
+      batch.set(publicProductRef, productData);
+
+      // Commit batch
+      await batch.commit();
+
+      if (!mounted) return;
+
+      // Close loading indicator
+      Navigator.pop(context);
+
+      // Show success message
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Product saved successfully!')),
+      );
+
+      // Navigate to scan screen
+      Navigator.pushReplacement(
         context,
         MaterialPageRoute(
           builder: (context) => ScanScreen(source: ImageSource.camera),
         ),
       );
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to save product: $e')),
-      );
+      print('Error saving product: $e'); // Add logging
+      // Close loading indicator if open
+      if (mounted) {
+        Navigator.of(context).pop();
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error saving product: $e')),
+        );
+      }
     }
   }
 
-
   Future<void> _saveToFirestore2() async {
-    final user = FirebaseAuth.instance.currentUser;
-    final firestore = FirebaseFirestore.instance;
-
-    if (user == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('You must be logged in to save data!')),
-      );
-      return;
-    }
+    if (!mounted) return;
 
     try {
-      String? imageUrl = widget.productInfo?.imageUrl; // Get existing URL
-
-      // Upload only if a new local image is picked
-      if (_imageFile != null) {
-        imageUrl = await UploadService.uploadImageToCloudinary(_imageFile!);
+      final user = FirebaseAuth.instance.currentUser;
+      if (user == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Please login to save products')),
+        );
+        return;
       }
 
-      // Save product data to Firestore
-      await firestore.collection('users').doc(user.uid).collection('products').add({
-        'barcodeId': widget.barcodeId,
-        'expiryDate': _currentExpiryDate,
-        'scannedText': widget.scannedText,
-        'productName': _editedName ?? widget.productInfo?.name,
-        'description': _editedDescription ?? widget.productInfo?.description,
-        'imageUrl': imageUrl ?? 'assets/images/dummy/img.png', // Keep asset images as is
-        'timestamp': FieldValue.serverTimestamp(),
-      });
-
-      await firestore.collection('publicProducts').add({
-        'barcodeId': widget.barcodeId,
-        'expiryDate': _currentExpiryDate,
-        'scannedText': widget.scannedText,
-        'productName': _editedName ?? widget.productInfo?.name,
-        'description': _editedDescription ?? widget.productInfo?.description,
-        'imageUrl': imageUrl ?? 'assets/images/dummy/img.png', // Keep asset images as is
-        'timestamp': FieldValue.serverTimestamp(),
-      });
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Product saved successfully!')),
-      );
-
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (context) => HomeScreen(),
+      // Show loading indicator
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => const Center(
+          child: CircularProgressIndicator(),
         ),
       );
-    } catch (e) {
+
+      String? imageUrl;
+      // Handle image upload first
+      if (_imageFile != null) {
+        try {
+          imageUrl = await UploadService.uploadImageToCloudinary(_imageFile!);
+        } catch (e) {
+          print('Error uploading image: $e');
+          imageUrl = 'assets/images/dummy/img.png';
+        }
+      }
+
+      // Prepare product data with all required fields
+      final productData = {
+        if (widget.barcodeId != null && widget.barcodeId!.isNotEmpty)
+          'barcodeId': widget.barcodeId,
+        'productName': _nameController.text.isNotEmpty 
+            ? _nameController.text 
+            : (widget.productInfo?.name ?? 'No name'),
+        'description': _descriptionController.text.isNotEmpty 
+            ? _descriptionController.text 
+            : (widget.productInfo?.description ?? ''),
+        'expiryDate': _currentExpiryDate,
+        'scannedText': widget.scannedText,
+        'imageUrl': imageUrl ?? widget.productInfo?.imageUrl ?? 'assets/images/dummy/img.png',
+        'timestamp': FieldValue.serverTimestamp(),
+        'brand': widget.productInfo?.brand ?? '',
+        'category': widget.productInfo?.category ?? '',
+        'manufacturer': widget.productInfo?.manufacturer ?? '',
+        'stores': widget.productInfo?.stores ?? '',
+        'price': widget.productInfo?.price ?? '',
+      };
+
+      // Use batch write
+      final batch = FirebaseFirestore.instance.batch();
+      
+      // Add to user's products
+      final userProductRef = FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .collection('products')
+          .doc();
+      batch.set(userProductRef, productData);
+
+      // Add to public products
+      final publicProductRef = FirebaseFirestore.instance
+          .collection('publicProducts')
+          .doc();
+      batch.set(publicProductRef, productData);
+
+      // Commit batch
+      await batch.commit();
+
+      if (!mounted) return;
+
+      // Close loading indicator
+      Navigator.pop(context);
+
+      // Show success message
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to save product: $e')),
+        const SnackBar(content: Text('Product saved successfully!')),
       );
+
+      // Navigate to home screen
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (context) => HomeScreen()),
+        (route) => false,
+      );
+    } catch (e) {
+      print('Error saving product: $e'); // Add logging
+      // Close loading indicator if open
+      if (mounted) {
+        Navigator.of(context).pop();
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error saving product: $e')),
+        );
+      }
     }
   }
 
@@ -220,235 +312,326 @@ class _ResultsPageState extends State<ResultsPage> {
     await flutterTts.speak(text);
   }
 
+  void _toggleNameEdit(bool editing) {
+    setState(() {
+      _isEditingName = editing;
+      if (!editing) {
+        // Save the changes when exiting edit mode
+        if (_nameController.text.isEmpty) {
+          _nameController.text = 'No name available';
+        }
+        _editedName = _nameController.text;
+      }
+    });
+  }
+
+  void _toggleDescriptionEdit(bool editing) {
+    setState(() {
+      _isEditingDescription = editing;
+      if (!editing) {
+        // Save the changes when exiting edit mode
+        if (_descriptionController.text.isEmpty) {
+          _descriptionController.text = 'No description available';
+        }
+        _editedDescription = _descriptionController.text;
+      }
+    });
+  }
+
+  Future<void> _deleteAndNavigate() async {
+    final user = FirebaseAuth.instance.currentUser;
+    final firestore = FirebaseFirestore.instance;
+
+    if (user == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('You must be logged in to delete data!')),
+      );
+      return;
+    }
+
+    try {
+      final batch = firestore.batch();
+      
+      // Get references to documents to delete
+      final userProductsQuery = firestore
+          .collection('users')
+          .doc(user.uid)
+          .collection('products')
+          .where('productName', isEqualTo: widget.productInfo?.name)
+          .limit(10); // Limit for safety
+
+      final publicProductsQuery = firestore
+          .collection('publicProducts')
+          .where('productName', isEqualTo: widget.productInfo?.name)
+          .limit(10); // Limit for safety
+
+      // Get the documents
+      final userDocs = await userProductsQuery.get();
+      final publicDocs = await publicProductsQuery.get();
+
+      // Add delete operations to batch
+      for (var doc in userDocs.docs) {
+        batch.delete(doc.reference);
+      }
+      for (var doc in publicDocs.docs) {
+        batch.delete(doc.reference);
+      }
+
+      // Commit the batch
+      await batch.commit();
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Product deleted successfully!')),
+      );
+
+      if (mounted) {
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (context) => HomeScreen()),
+          (Route<dynamic> route) => false,
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to delete product: $e')),
+        );
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Scan Results'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.delete),
+            onPressed: _deleteAndNavigate,
+            color: Colors.red,
+          ),
+        ],
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Card(
-          elevation: 4,
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Image display/edit
-                if (_imageFile != null)
-                  Center(
-                    child: Image.file(
-                      _imageFile!,
-                      height: 200,
-                      fit: BoxFit.cover,
-                    ),
-                  )
-                else if (widget.productInfo?.imageUrl != null && widget.productInfo!.imageUrl!.isNotEmpty)
-                  Center(
-                    child: widget.productInfo!.imageUrl!.startsWith('http') // Check if it's a URL
-                        ? Image.network(
-                      widget.productInfo!.imageUrl!,
-                      height: 200,
-                      fit: BoxFit.cover,
-                      loadingBuilder: (context, child, loadingProgress) {
-                        if (loadingProgress == null) {
-                          return child;
-                        } else {
-                          return Center(child: CircularProgressIndicator());
-                        }
-                      },
-                      errorBuilder: (context, error, stackTrace) {
-                        return Center(child: Icon(Icons.error, color: Colors.red));
-                      },
+      body: GestureDetector(
+        onTap: () {
+          // Dismiss keyboard and exit edit mode when tapping outside
+          FocusScope.of(context).unfocus();
+          _toggleNameEdit(false);
+          _toggleDescriptionEdit(false);
+        },
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(16),
+          child: Card(
+            elevation: 4,
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Image display/edit
+                  if (_imageFile != null)
+                    Center(
+                      child: Image.file(
+                        _imageFile!,
+                        height: 200,
+                        fit: BoxFit.cover,
+                      ),
                     )
-                        : Image.asset(
-                      widget.productInfo!.imageUrl!,
-                      height: 200,
-                      fit: BoxFit.cover,
+                  else if (widget.productInfo?.imageUrl != null && widget.productInfo!.imageUrl!.isNotEmpty)
+                    Center(
+                      child: widget.productInfo!.imageUrl!.startsWith('http') // Check if it's a URL
+                          ? Image.network(
+                        widget.productInfo!.imageUrl!,
+                        height: 200,
+                        fit: BoxFit.cover,
+                        loadingBuilder: (context, child, loadingProgress) {
+                          if (loadingProgress == null) {
+                            return child;
+                          } else {
+                            return Center(child: CircularProgressIndicator());
+                          }
+                        },
+                        errorBuilder: (context, error, stackTrace) {
+                          return Center(child: Icon(Icons.error, color: Colors.red));
+                        },
+                      )
+                          : Image.asset(
+                        widget.productInfo!.imageUrl!,
+                        height: 200,
+                        fit: BoxFit.cover,
+                      ),
+                    )
+                  else
+                    Center(
+                      child: Image.asset(
+                        'assets/images/dummy/img.png',
+                        height: 200,
+                        fit: BoxFit.cover,
+                      ),
                     ),
-                  )
-                else
-                  Center(
-                    child: Image.asset(
-                      'assets/images/dummy/img.png',
-                      height: 200,
-                      fit: BoxFit.cover,
+                  IconButton(
+                    icon: const Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        Text('edit image', style: TextStyle(color: Colors.blue),),
+                        SizedBox(width: 5,),
+                        Icon(Icons.edit),
+                      ],
                     ),
+                    onPressed: _editImage,
+                    tooltip: 'Change Image',
+                    color: Colors.blue,
                   ),
-                IconButton(
-                  icon: const Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      Text('edit image', style: TextStyle(color: Colors.blue),),
-                      SizedBox(width: 5,),
-                      Icon(Icons.edit),
-                    ],
-                  ),
-                  onPressed: _editImage,
-                  tooltip: 'Change Image',
-                  color: Colors.blue,
-                ),
-                const SizedBox(height: 16),
+                  const SizedBox(height: 16),
 
-                // Product Name
-                if (_isEditingName) ...[
-                  TextField(
-                    controller: _nameController,
-                    decoration: const InputDecoration(labelText: 'Product Name'),
-                    onChanged: (value) {
-                      setState(() {
+                  // Product Name
+                  if (_isEditingName) ...[
+                    TextField(
+                      controller: _nameController,
+                      decoration: const InputDecoration(labelText: 'Product Name'),
+                      onEditingComplete: () => _toggleNameEdit(false),
+                      onSubmitted: (_) => _toggleNameEdit(false),
+                      onChanged: (value) {
                         _editedName = value;
-                      });
-                    },
-                  ),
-                  const SizedBox(height: 16),
-                ] else ...[
-                  Text(
-                    'Product Name',
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
+                      },
                     ),
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Expanded(
-                        child: Row(
-                          children: [
-                            Expanded(
-                              child: Text(
-                                _editedName ?? 'No name available',
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ),
-                            IconButton(
-                              icon: const Icon(Icons.volume_up),
-                              onPressed: () => _speak(_editedName ?? 'No name available'),
-                              color: Colors.blue,
-                            ),
-                          ],
-                        ),
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.edit),
-                        onPressed: () {
-                          setState(() {
-                            _isEditingName = true;
-                          });
-                        },
-                        tooltip: 'Edit Name',
-                        color: Colors.blue,
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
-                ],
-
-                // Product Description
-                if (_isEditingDescription) ...[
-                  TextField(
-                    controller: _descriptionController,
-                    decoration: const InputDecoration(labelText: 'Description'),
-                    onChanged: (value) {
-                      setState(() {
-                        _editedDescription = value;
-                      });
-                    },
-                  ),
-                  const SizedBox(height: 16),
-                ] else ...[
-                  Text(
-                    'Description',
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Expanded(
-                        child: Row(
-                          children: [
-                            Expanded(
-                              child: Text(
-                                _editedDescription ?? 'No description available',
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ),
-                            IconButton(
-                              icon: const Icon(Icons.volume_up),
-                              onPressed: () => _speak(_editedDescription ?? 'No description available'),
-                              color: Colors.blue,
-                            ),
-                          ],
-                        ),
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.edit),
-                        onPressed: () {
-                          setState(() {
-                            _isEditingDescription = true;
-                          });
-                        },
-                        tooltip: 'Edit Description',
-                        color: Colors.blue,
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
-                ],
-
-                // Barcode ID
-                if (widget.barcodeId != null) ...[
-                  Text(
-                    'Barcode',
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  Text(widget.barcodeId!),
-                  const SizedBox(height: 16),
-                ],
-
-                // Expiry Date
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
+                  ] else ...[
                     Text(
-                      'Expiry Date',
+                      'Product Name',
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.bold,
                       ),
                     ),
                     Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        if (_currentExpiryDate != null)
-                          IconButton(
-                            icon: const Icon(Icons.volume_up),
-                            onPressed: () => _speak('Expiry date is ${_currentExpiryDate}'),
-                            color: Colors.blue,
+                        Expanded(
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  _editedName ?? 'No name available',
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                              IconButton(
+                                icon: const Icon(Icons.volume_up),
+                                onPressed: () => _speak(_editedName ?? 'No name available'),
+                                color: Colors.blue,
+                              ),
+                            ],
                           ),
-                        if (!_isEditingDate)
-                          IconButton(
-                            icon: const Icon(Icons.edit),
-                            onPressed: _editExpiryDate,
-                            tooltip: 'Edit Date',
-                            color: Colors.blue,
-                          ),
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.edit),
+                          onPressed: () => _toggleNameEdit(true),
+                          color: Colors.blue,
+                        ),
                       ],
                     ),
+                    const SizedBox(height: 16),
                   ],
-                ),
-                if (_currentExpiryDate != null)
-                  Text(_currentExpiryDate!)
-                else
-                  TextButton.icon(
-                    onPressed: _editExpiryDate,
-                    icon: const Icon(Icons.calendar_today),
-                    label: const Text('Add Expiry Date'),
+
+                  // Product Description
+                  if (_isEditingDescription) ...[
+                    TextField(
+                      controller: _descriptionController,
+                      decoration: const InputDecoration(labelText: 'Description'),
+                      onEditingComplete: () => _toggleDescriptionEdit(false),
+                      onSubmitted: (_) => _toggleDescriptionEdit(false),
+                      onChanged: (value) {
+                        _editedDescription = value;
+                      },
+                    ),
+                  ] else ...[
+                    Text(
+                      'Description',
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Expanded(
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  _editedDescription ?? 'No description available',
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                              IconButton(
+                                icon: const Icon(Icons.volume_up),
+                                onPressed: () => _speak(_editedDescription ?? 'No description available'),
+                                color: Colors.blue,
+                              ),
+                            ],
+                          ),
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.edit),
+                          onPressed: () => _toggleDescriptionEdit(true),
+                          color: Colors.blue,
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                  ],
+
+                  // Barcode ID
+                  if (widget.barcodeId != null) ...[
+                    Text(
+                      'Barcode',
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    Text(widget.barcodeId!),
+                    const SizedBox(height: 16),
+                  ],
+
+                  // Expiry Date
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Expiry Date',
+                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      Row(
+                        children: [
+                          if (_currentExpiryDate != null)
+                            IconButton(
+                              icon: const Icon(Icons.volume_up),
+                              onPressed: () => _speak('Expiry date is ${_currentExpiryDate}'),
+                              color: Colors.blue,
+                            ),
+                          if (!_isEditingDate)
+                            IconButton(
+                              icon: const Icon(Icons.edit),
+                              onPressed: _editExpiryDate,
+                              tooltip: 'Edit Date',
+                              color: Colors.blue,
+                            ),
+                        ],
+                      ),
+                    ],
                   ),
-              ],
+                  if (_currentExpiryDate != null)
+                    Text(_currentExpiryDate!)
+                  else
+                    TextButton.icon(
+                      onPressed: _editExpiryDate,
+                      icon: const Icon(Icons.calendar_today),
+                      label: const Text('Add Expiry Date'),
+                    ),
+                ],
+              ),
             ),
           ),
         ),

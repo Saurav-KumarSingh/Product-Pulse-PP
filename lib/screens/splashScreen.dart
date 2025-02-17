@@ -1,7 +1,9 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import '../utils/helper.dart';
 import 'introScreen.dart';
+import 'homeScreen.dart';
     
 class Splashscreen extends StatefulWidget {
   const Splashscreen({super.key});
@@ -12,21 +14,33 @@ class Splashscreen extends StatefulWidget {
 
 class _SplashscreenState extends State<Splashscreen> {
   Timer? _timer;
+
   @override
   void initState() {
-    // TODO: implement initState
-    _timer = Timer(Duration(seconds: 5), () {
-      Navigator.of(context).pushReplacementNamed(IntroScreen.routeName);
-    });
     super.initState();
+    _checkAuthAndNavigate();
+  }
+
+  Future<void> _checkAuthAndNavigate() async {
+    _timer = Timer(Duration(seconds: 3), () {
+      // Check if user is already logged in
+      final user = FirebaseAuth.instance.currentUser;
+      if (user != null) {
+        // User is logged in, go to HomeScreen
+        Navigator.of(context).pushReplacementNamed(HomeScreen.routeName);
+      } else {
+        // User is not logged in, go to IntroScreen
+        Navigator.of(context).pushReplacementNamed(IntroScreen.routeName);
+      }
+    });
   }
 
   @override
-  // void dispose() {
-  //   // TODO: implement dispose
-  //   _timer.cancel();
-  //   super.dispose();
-  // }
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -37,7 +51,7 @@ class _SplashscreenState extends State<Splashscreen> {
           children: [
             Container(
               height: double.infinity,
-              width : double.infinity,
+              width: double.infinity,
               child: Image.asset(
                 Helper.getAssetName("splashbg.png", "virtual"),
                 fit: BoxFit.fill,

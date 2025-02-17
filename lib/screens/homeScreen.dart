@@ -145,20 +145,21 @@ class _HomeScreenState extends State<HomeScreen> {
 
                         _allProducts = snapshot.data!.docs.map((doc) {
                           try {
+                            final data = doc.data() as Map<String, dynamic>;
                             return Product(
                               id: doc.id,
-                              barcodeId: doc['barcodeId']?.toString() ?? '',
-                              expiryDate: doc['expiryDate']?.toString() ?? '',
-                              scannedText: doc['scannedText']?.toString() ?? '',
-                              productName: doc['productName']?.toString() ?? 'Unknown',
-                              description: doc['description']?.toString() ?? '',
-                              imageUrl: doc['imageUrl']?.toString() ?? '',
+                              barcodeId: data['barcodeId']?.toString(),
+                              expiryDate: data['expiryDate']?.toString() ?? '',
+                              scannedText: data['scannedText']?.toString() ?? '',
+                              productName: data['productName']?.toString() ?? 'Unknown',
+                              description: data['description']?.toString() ?? '',
+                              imageUrl: data['imageUrl']?.toString() ?? '',
                             );
                           } catch (e) {
                             print("Error parsing product: $e");
                             return Product(
                               id: doc.id,
-                              barcodeId: '',
+                              barcodeId: null,
                               expiryDate: '',
                               scannedText: '',
                               productName: 'Error loading',
@@ -279,7 +280,7 @@ class CategoryCard extends StatelessWidget {
 
 class Product {
   final String id;
-  final String barcodeId;
+  final String? barcodeId;
   final String expiryDate;
   final String scannedText;
   final String productName;
@@ -288,7 +289,7 @@ class Product {
 
   Product({
     required this.id,
-    required this.barcodeId,
+    this.barcodeId,
     required this.expiryDate,
     required this.scannedText,
     required this.productName,
