@@ -96,10 +96,8 @@ Consumers often:
    ```
 
 ## Contributors
-- **Saurav Kumar Singh** - Developer
-- **Prashant** - Developer
-- **Muskan Puja** - UI/UX & Frontend
-
+- [**Saurav Kumar Singh**](https://github.com/sauravksingh) - Developer
+- [**Prashant**](https://github.com/prashant19092004) - Developer
 ---
 🌟 *Hold the Pulse of Your Products!* 🌟
 
