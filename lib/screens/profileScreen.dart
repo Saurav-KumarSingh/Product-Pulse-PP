@@ -2,7 +2,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:product_pulse/screens/help_support.dart';
-import 'package:product_pulse/screens/loginScreen.dart';
 import '../widgets/customNavBar.dart';
 import 'editProfileScreen.dart';
 
@@ -36,16 +35,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
     User? currentUser = _auth.currentUser;
     if (currentUser != null) {
       try {
-        DocumentSnapshot userDoc = await _firestore.collection('users').doc(currentUser.uid).get();
+        DocumentSnapshot userDoc = await _firestore
+            .collection('users')
+            .doc(currentUser.uid)
+            .get();
+
         if (userDoc.exists) {
-          print(userDoc);
+          final data = userDoc.data() as Map<String, dynamic>;
           setState(() {
-            _name = userDoc['name'] ?? '';
-            _email = userDoc['email'] ?? '';
-            _mobile = userDoc['mobile'] ?? '';
-            _address = userDoc['address'] ?? '';
-            _profileImageUrl = userDoc['profileImage'] ?? '';
+            _name = data['name'] ?? 'No name';
+            _email = data['email'] ?? 'No email';
+            _mobile = data['mobile'] ?? 'No mobile';
+            _address = data['address'] ?? 'No address';
+            _profileImageUrl = data['profileImage'] ?? '';
             _isLoading = false;
+            _errorMessage = '';
           });
         } else {
           setState(() {
@@ -54,9 +58,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
           });
         }
       } catch (error) {
+        print('Error fetching user data: $error');
         setState(() {
           _isLoading = false;
-          _errorMessage = 'Error fetching data';
+          _errorMessage = 'Error fetching data: $error';
         });
       }
     } else {
@@ -176,9 +181,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       _buildProfileOption(
                         icon: Icons.logout,
                         title: 'Logout',
-                        onTap: () {
-                          Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>LoginScreen()));
-                        },
+                        onTap: _signOut,
                         isLogout: true,
                       ),
                     ],
@@ -252,5 +255,66 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ],
       ),
     );
+  }
+
+  // Add this method to handle sign out
+  Future<void> _signOut() async {
+    // Show confirmation dialog
+    bool? confirmLogout = await showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Confirm Logout'),
+          content: const Text('Are you sure you want to logout?'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: const Text('Cancel', style: TextStyle(color: Colors.grey)),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(true),
+              child: const Text('Logout', style: TextStyle(color: Colors.red)),
+            ),
+          ],
+        );
+      },
+    );
+
+    // If user confirmed logout
+    if (confirmLogout == true) {
+      try {
+        // Show loading dialog
+        showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (context) => const Center(
+            child: CircularProgressIndicator(),
+          ),
+        );
+
+        // Sign out from Firebase
+        await FirebaseAuth.instance.signOut();
+
+        // Close loading dialog
+        Navigator.pop(context);
+
+        if (mounted) {
+          // Navigate to login screen and remove all previous routes
+          Navigator.pushNamedAndRemoveUntil(
+              context,
+              '/loginScreen',
+                  (route) => false
+          );
+        }
+      } catch (e) {
+        // Close loading dialog
+        Navigator.pop(context);
+
+        // Show error message
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error signing out: $e')),
+        );
+      }
+    }
   }
 }
