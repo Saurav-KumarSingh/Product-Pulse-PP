@@ -1,6 +1,7 @@
 {
   "project_info": {
     "project_number": "129508038034",
+    "firebase_url": "https://flutter-fire-ae112-default-rtdb.firebaseio.com",
     "project_id": "flutter-fire-ae112",
     "storage_bucket": "flutter-fire-ae112.firebasestorage.app"
   },
@@ -12,7 +13,20 @@
           "package_name": "com.example.product_pulse1"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "129508038034-ekl7vsi8r29p9ga8qksfs48ea9mkfubt.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.product_pulse1",
+            "certificate_hash": "5485c1e2253a705d1ab4151dc29c388953703d80"
+          }
+        },
+        {
+          "client_id": "129508038034-3b5s7jf8538vjlmnr0l9t0do5hpn5ubi.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyDRpPHzS43znH8Ifl6BXUjLAB5Jnx3vUpU"
@@ -20,7 +34,12 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "129508038034-3b5s7jf8538vjlmnr0l9t0do5hpn5ubi.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }

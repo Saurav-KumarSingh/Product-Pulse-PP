@@ -6,7 +6,7 @@ import '../utils/helper.dart';
 import '../widgets/customTextInput.dart';
 import 'loginScreen.dart';
 import '../const/colors.dart';
-import 'introScreen.dart';
+import '../services/auth_service.dart';
 
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({super.key});
@@ -19,6 +19,7 @@ class SignUpScreen extends StatefulWidget {
 class _SignUpScreenState extends State<SignUpScreen> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final AuthService _authService = AuthService();
 
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
@@ -28,6 +29,38 @@ class _SignUpScreenState extends State<SignUpScreen> {
   final TextEditingController _confirmPasswordController = TextEditingController();
 
   bool _isLoading = false;
+
+  Future<void> _signUpWithGoogle() async {
+    try {
+      setState(() {
+        _isLoading = true;
+      });
+
+      final userCredential = await _authService.signInWithGoogle();
+
+      if (userCredential != null && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Sign up successful!')),
+        );
+        Navigator.of(context).pushNamedAndRemoveUntil(
+          HomeScreen.routeName,
+          (route) => false,
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error signing up with Google: $e')),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
+  }
 
   void _signUp() async {
     String name = _nameController.text.trim();
@@ -96,6 +129,31 @@ class _SignUpScreenState extends State<SignUpScreen> {
     }
   }
 
+  Widget _googleSignUpButton() {
+    return Container(
+      width: double.infinity,
+      height: 50,
+      margin: EdgeInsets.symmetric(vertical: 20),
+      child: ElevatedButton.icon(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.white,
+          foregroundColor: Colors.black,
+          elevation: 2,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+            side: BorderSide(color: Colors.grey.shade300),
+          ),
+        ),
+        icon: Image.asset(
+          'assets/images/logos/google.png',
+          height: 24,
+        ),
+        label: Text('Sign up with Google'),
+        onPressed: _isLoading ? null : _signUpWithGoogle,
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -125,13 +183,18 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   CustomTextInput(controller: _confirmPasswordController, hintText: "Confirm Password", obscureText: true),
                   Spacer(),
                   SizedBox(
-                    height: 50,
                     width: double.infinity,
+                    height: 50,
                     child: ElevatedButton(
                       onPressed: _isLoading ? null : _signUp,
-                      child: _isLoading ? CircularProgressIndicator(color: Colors.white) : Text("Sign Up"),
+                      child: _isLoading 
+                          ? CircularProgressIndicator(color: Colors.white)
+                          : Text("Sign Up"),
                     ),
                   ),
+                  SizedBox(height: 20),
+                  Text('OR', style: TextStyle(color: Colors.grey)),
+                  _googleSignUpButton(),
                   Spacer(flex: 3),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -142,7 +205,13 @@ class _SignUpScreenState extends State<SignUpScreen> {
                         onTap: () {
                           Navigator.of(context).pushReplacementNamed(LoginScreen.routeName);
                         },
-                        child: Text("Login", style: TextStyle(color: AppColor.orange, fontWeight: FontWeight.w600)),
+                        child: Text(
+                          "Login",
+                          style: TextStyle(
+                            color: AppColor.orange,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
                       ),
                     ],
                   ),
